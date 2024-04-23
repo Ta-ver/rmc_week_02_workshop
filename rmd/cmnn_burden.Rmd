@@ -1,29 +1,52 @@
 # Communicable, Maternal, Neonatal, and Nutritional Disease Burden (CMNN)
 
-```{r}
+```{r echo = FALSE, message = FALSE}
 # Load necessary packages
 pacman::p_load(tidyverse, knitr, here)
 
 # Import the communicable diseases data
 data_cmnn <- read_csv(here("data", "burden-of-disease-cmnn.csv"))
+
 ```
 
 ## Table of Estimates for CMNN Burden Over Time
 
-```{r}
+```{r echo = FALSE, message = FALSE, show_col_types = FALSE}
 # Here render a table for the DALY burden over time for the three countries 
 # You should pivot the data to show each country in a separate column.
 # Use kable() from the knitr package to render the table.
+
+ben_mli_bfa_cmnn <- data_cmnn %>% 
+  filter(Entity %in% c("Benin","Burkina Faso", "Mali")) %>% 
+  select(Entity,Year,`DALYs (Disability-Adjusted Life Years) - Communicable, maternal, neonatal, and nutritional diseases - Sex: Both - Age: Age-standardized (Rate)`) %>% 
+  rename(DALYs = "DALYs (Disability-Adjusted Life Years) - Communicable, maternal, neonatal, and nutritional diseases - Sex: Both - Age: Age-standardized (Rate)")
+
+ben_mli_bfa_cmnn_wider <- ben_mli_bfa_cmnn %>% 
+  pivot_wider(values_from = DALYs,
+              names_from = Entity) %>% 
+   mutate(across(starts_with("Benin") | starts_with("Burkina Faso") | starts_with("Mali"), ~round(., digits = 0)))
+
+  kable(ben_mli_bfa_cmnn_wider)
 ```
 
 ## Plot Showing Trends in CMNN Burden Over Time
 
-```{r}
+```{r echo = FALSE}
 # Here, plot a line graph showing the trend of DALY burden for the chosen countries over time. You can use ggplot2 to create this plot. Each country's line should be a different color.
+
+ggplot(data = ben_mli_bfa_cmnn,
+       aes(x = Year, y = DALYs, color = Entity)) +
+  geom_line() +
+  labs(title = "Line Graph for Benin, Burkina Faso, Mali",
+       subtitle = "CMNN Burden, 1990 - 2020",
+       x = "Year",
+       y = "Value",
+       color = "Country") +
+  theme_minimal()
 ```
 
 ## Summary of CMNN Burden Findings
 
-Provide a brief analysis based on the data presented in the table and chart. Highlight any significant findings or patterns. About 3 sentences.
-
-
+Overall, the DALYs for the CMNN in these countries seem to fall within the period under review.
+This maybe due to effect of improved infrastructure or better healthcare over the years.
+Benin seems to have a more slower and steady fall, perhaps due to a smaller population.
